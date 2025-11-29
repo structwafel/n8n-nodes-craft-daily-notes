@@ -60,23 +60,48 @@ export async function blockInsertPreSend(
 	// Build position object
 	const position = buildPositionObject(this);
 
-	// Get markdown content
+	// Get markdown content - ULTRA DEFENSIVE
 	let markdownContent = '';
 	try {
-		markdownContent = this.getNodeParameter('markdownContent', '') as string;
+		const rawValue = this.getNodeParameter('markdownContent', '');
+		// Force to string, handle any type
+		if (rawValue === null || rawValue === undefined) {
+			markdownContent = '';
+		} else if (typeof rawValue === 'string') {
+			markdownContent = rawValue;
+		} else if (typeof rawValue === 'object') {
+			// If somehow it's an object, stringify it
+			markdownContent = JSON.stringify(rawValue);
+		} else {
+			markdownContent = String(rawValue);
+		}
 	} catch {
-		// Use empty string as default
+		markdownContent = '';
 	}
 
-	// SIMPLE: Send as single text block with markdown - API parses it!
-	requestOptions.body = {
+	// Create the body as a plain object
+	const bodyObject = {
 		blocks: [
 			{
 				type: 'text',
 				markdown: markdownContent,
 			},
 		],
-		position,
+		position: {
+			position: String(position.position || 'end'),
+			date: String(position.date || 'today'),
+			...(position.referenceBlockId ? { referenceBlockId: String(position.referenceBlockId) } : {}),
+		},
+	};
+
+	// Use JSON.stringify to ensure proper serialization
+	// This bypasses any n8n body processing that might cause issues
+	requestOptions.body = JSON.stringify(bodyObject);
+	
+	// Ensure Content-Type is set (might be overwritten by n8n)
+	requestOptions.headers = {
+		...requestOptions.headers,
+		'Content-Type': 'application/json',
 	};
 
 	return requestOptions;
