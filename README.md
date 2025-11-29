@@ -1,368 +1,447 @@
-# n8n Custom Node Starter - Essential Context
-
-## Purpose
-Official starter repository for building custom n8n community nodes with example implementations, documentation, and development tooling.
-
-## Project Structure
-
-### Core Files
-- **nodes/** - Node implementations
-  - `Example/` - Basic programmatic node template
-  - `GithubIssues/` - Advanced declarative REST API node with resources/operations
-- **credentials/** - Authentication configurations
-- **docs/** - 30+ comprehensive guides (00-30)
-
-### Key Examples
-```
-nodes/GithubIssues/
-├── GithubIssues.node.ts          # Main node file
-├── resources/                     # Resource-based organization
-│   ├── issue/                     # CRUD operations per resource
-│   └── issueComment/
-├── listSearch/                    # Dynamic dropdowns
-└── shared/                        # Reusable utilities
-    ├── transport.ts               # API request wrapper
-    └── descriptions.ts            # UI configurations
-```
-
-## Setup & Initialization
-
-### 1. Create Repository with GitHub CLI
-
-```bash
-# Create from this template
-gh repo create my-n8n-nodes --template n8n-io/n8n-nodes-starter --public --clone
-
-# Or create manually and initialize
-gh repo create my-n8n-nodes --public
-git clone https://github.com/yourusername/my-n8n-nodes
-cd my-n8n-nodes
-```
-
-**GitHub CLI Quick Reference:**
-- `gh repo create` - Create new repository
-- `gh repo clone` - Clone repository
-- `gh auth login` - Authenticate GitHub
-- `gh --help` - Full command reference
-
-### 2. Configure .gitignore
-
-**Essential exclusions:**
-```gitignore
-# Build output
-dist/
-*.tsbuildinfo
-
-# Dependencies
-node_modules/
-
-# Environment & IDE
-.env
-.DS_Store
-.vscode/
-.idea/
-
-# Keep out of Git for publication
-docs/
-README_TEMPLATE.md
-```
-
-### 3. Git Initialization & Cleanup
-
-```bash
-# Initialize repository
-git init
-
-# Clean cache if needed (remove tracked files now in .gitignore)
-git rm -r --cached dist/
-git rm -r --cached node_modules/
-
-# Initial commit
-git add .
-git commit -m "Initial commit: n8n custom node starter"
-
-# Connect to remote
-git remote add origin https://github.com/yourusername/my-n8n-nodes.git
-git branch -M main
-git push -u origin main
-```
-
-**Git Workflow Commands:**
-- `git status` - Check working tree status
-- `git add <files>` - Stage changes
-- `git commit -m "message"` - Record changes
-- `git push` - Update remote repository
-- `git pull` - Fetch and merge remote changes
-- `git log` - Show commit history
-
-## Development Workflow
-
-### Quick Start Commands
-
-```bash
-# Install dependencies (first time)
-npm install
-
-# Development (watch + hot reload)
-npm run dev
-# Opens n8n at http://localhost:5678 with your node loaded
-
-# Build for production
-npm run build
-
-# Lint code
-npm run lint
-
-# Auto-fix lint issues
-npm run lint:fix
-
-# Create release
-npm run release
-```
-
-### Development Cycle
-1. Run `npm run dev` - Starts n8n with watch mode
-2. Make changes to node files
-3. Changes auto-rebuild and reload in n8n
-4. Test in n8n workflow editor
-5. Check console for errors
-
-## Configuration Checklist
-
-### 1. Update package.json
-
-**Required fields:**
-```json
-{
-  "name": "n8n-nodes-<your-service>",
-  "version": "1.0.0",
-  "description": "n8n node for <service>",
-  "author": "Your Name <email@example.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/my-n8n-nodes.git"
-  },
-  "keywords": ["n8n-community-node-package"],
-  "n8n": {
-    "nodes": [
-      "dist/nodes/YourNode/YourNode.node.js"
-    ],
-    "credentials": [
-      "dist/credentials/YourNodeApi.credentials.js"
-    ]
-  }
-}
-```
-
-**Key points:**
-- Name **must** start with `n8n-nodes-`
-- Include `n8n-community-node-package` keyword
-- Register all nodes/credentials in `n8n` section
-
-### 2. Essential File Structure
-
-```
-my-n8n-nodes/
-├── nodes/
-│   └── YourNode/
-│       ├── YourNode.node.ts      # Main implementation
-│       ├── YourNode.node.json    # Metadata
-│       └── yournode.svg          # Icon (optional)
-├── credentials/
-│   └── YourNodeApi.credentials.ts
-├── package.json
-├── tsconfig.json
-├── .gitignore
-├── LICENSE.md
-└── README.md
-```
-
-## Documentation Navigation
-
-### AI Agent Quick Router
-| Task | Start Here | Then Read |
-|------|-----------|-----------|
-| Build new node | `docs/10-creating-your-first-node.md` | → `docs/05-declarative-vs-programmatic-nodes.md` |
-| API key auth | `docs/08-api-key-credentials.md` | → `docs/07-credentials-system-overview.md` |
-| OAuth2 auth | `docs/09-oauth2-credentials.md` | → `docs/07-credentials-system-overview.md` |
-| REST API node | `docs/12-declarative-routing.md` | → `docs/06-node-properties-reference.md` |
-| SDK integration | `docs/13-custom-execute-methods.md` | → `docs/19-external-sdk-integration.md` |
-| Dynamic dropdowns | `docs/14-list-search-methods.md` | → `docs/15-resource-locators.md` |
-| Multi-resource API | `docs/11-resources-and-operations.md` | → `docs/04-node-anatomy-and-architecture.md` |
-| Pagination | `docs/16-pagination-handling.md` | → `docs/12-declarative-routing.md` |
-| Debugging | `docs/30-troubleshooting-guide.md` | → `docs/17-error-handling-patterns.md` |
-| Publishing | `docs/25-preparing-for-publication.md` | → `docs/26-publishing-to-npm.md` |
-
-### Complete Documentation Index (30 files)
-- **00-04**: Project setup, structure, TypeScript config, architecture
-- **05-09**: Node types (declarative/programmatic), properties, credentials
-- **10-15**: Creating nodes, resources, routing, dynamic UI
-- **16-21**: Pagination, errors, helpers, SDKs, icons, metadata
-- **22-27**: Development, testing, linting, publishing, verification
-- **28-30**: Examples, patterns, troubleshooting
-
-**Full guide:** `docs/00-documentation-index.md`
-
-## Prerequisites
-
-**Required:**
-- **Node.js v22+** with npm
-  - Install via [nvm](https://github.com/nvm-sh/nvm) (Linux/Mac/WSL)
-  - Install via [official installer](https://nodejs.org/) (Windows)
-- **git**
-- **GitHub CLI** (`gh`) - optional but recommended
-
-**Recommended:**
-- Follow n8n's [development environment setup guide](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/)
-
-**Note:** `@n8n/node-cli` is included as dev dependency - no global n8n install needed
-
-## Publishing Workflow
-
-### Pre-Publication Checklist
-
-1. **Clean documentation:**
-   ```bash
-   # Remove template files
-   rm README_TEMPLATE.md
-   
-   # Exclude docs from Git (add to .gitignore)
-   echo "docs/" >> .gitignore
-   git rm -r --cached docs/
-   ```
-
-2. **Update README.md:**
-   - Use `README_TEMPLATE.md` as starting point
-   - Document installation, usage, credentials setup
-   - Include example workflows
-
-3. **Update LICENSE.md:**
-   - Add your name and year
-   - Keep MIT license for n8n Cloud verification
-
-4. **Test thoroughly:**
-   - Run `npm run dev` and test all operations
-   - Verify error handling
-   - Test with real API credentials
-
-5. **Lint and build:**
-   ```bash
-   npm run lint:fix
-   npm run build
-   ```
-
-### Publishing to npm
-
-```bash
-# Ensure npm is configured
-npm login
-
-# Publish package
-npm publish
-
-# For scoped packages
-npm publish --access public
-```
-
-**npm Configuration:**
-```bash
-npm whoami              # Check logged-in user
-npm config get registry # Verify registry (https://registry.npmjs.org/)
-```
-
-### Submit for n8n Cloud Verification (Optional)
-
-**Requirements:**
-- ✅ MIT license (included in starter)
-- ✅ No external package dependencies
-- ✅ Follows n8n design guidelines
-- ✅ Passes quality and security review
-
-**Submit:** [n8n Creator Portal](https://creators.n8n.io/nodes)
-
-**Benefits:**
-- Available in n8n Cloud
-- Discoverable in nodes panel
-- Verified badge
-- Increased community visibility
-
-## Reference Patterns
-
-| Component | File | Use Case |
-|-----------|------|----------|
-| Declarative node | `nodes/GithubIssues/GithubIssues.node.ts` | REST API integration |
-| Programmatic node | `nodes/Example/Example.node.ts` | Custom execution logic |
-| API key auth | `credentials/GithubIssuesApi.credentials.ts` | Bearer token |
-| OAuth2 auth | `credentials/GithubIssuesOAuth2Api.credentials.ts` | OAuth flow |
-| Resource organization | `nodes/GithubIssues/resources/issue/` | Multi-operation structure |
-| Dynamic options | `nodes/GithubIssues/listSearch/` | List/search methods |
-| Transport layer | `nodes/GithubIssues/shared/transport.ts` | API request wrapper |
-
-## Key Architecture Principles
-
-1. **Declarative for REST APIs** - Use routing for HTTP-based integrations
-2. **Programmatic for complex logic** - Custom execute() for non-standard flows
-3. **Resource → Operations pattern** - Group API endpoints logically (Issue → Create/Get/Update/Delete)
-4. **Separate credentials** - Never hardcode secrets, use credential files
-5. **Modular file structure** - Keep operations in separate files for maintainability
-6. **Reusable transport layer** - Abstract API client logic in shared utilities
-7. **Follow examples** - Use GithubIssues node as reference for best practices
-
-## Troubleshooting
-
-### Node doesn't appear in n8n
-1. Verify `npm install` completed successfully
-2. Check `package.json` → `n8n.nodes` array includes your node
-3. Ensure node file path matches registration (dist/nodes/...)
-4. Restart dev server: `npm run dev`
-5. Check console for build/registration errors
-
-### TypeScript compilation errors
-- Ensure Node.js v22 or higher: `node --version`
-- Run `npm install` to get all type definitions
-- Check `tsconfig.json` is present and valid
-
-### Lint errors
-- Auto-fix: `npm run lint:fix`
-- Review [n8n coding guidelines](https://docs.n8n.io/integrations/creating-nodes/)
-- Check specific error messages for guidance
-
-### Node registered but not working
-- Check browser console for errors
-- Verify credentials are properly configured
-- Test API endpoints independently (Postman/curl)
-- Review `docs/30-troubleshooting-guide.md`
-
-### Build issues
-```bash
-# Clean build artifacts
-rm -rf dist/
-npm run build
-
-# Or clean install
-rm -rf node_modules/ dist/
-npm install
-npm run build
-```
-
-## Available Scripts
-
-| Script | Description | CLI Equivalent |
-|--------|-------------|----------------|
-| `npm run dev` | Start n8n with watch mode | `npx n8n-node dev` |
-| `npm run build` | Compile TypeScript to dist/ | `npx n8n-node build` |
-| `npm run build:watch` | Build with auto-rebuild | - |
-| `npm run lint` | Check code quality | `npx n8n-node lint` |
-| `npm run lint:fix` | Auto-fix lint issues | `npx n8n-node lint --fix` |
-| `npm run release` | Create new release | `npx n8n-node release` |
-
-**CLI Tool:** All scripts use [@n8n/node-cli](https://www.npmjs.com/package/@n8n/node-cli) under the hood
+# n8n Custom Node Starter
+
+> Build n8n community nodes with your favorite AI coding assistant. Pre-configured rules for 11 tools — pick one, remove the rest.
+
+[![n8n](https://img.shields.io/badge/n8n-Community%20Node-FF6D5A?style=flat-square&logo=n8n&logoColor=white)](https://docs.n8n.io/integrations/creating-nodes/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-22+-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE.md)
+[![Docs](https://img.shields.io/badge/Docs-31%20Files-blue?style=flat-square)](docs/)
 
 ---
 
-**Quick Links:**
-- 📖 Full documentation: `docs/00-documentation-index.md`
-- 🌐 n8n docs: https://docs.n8n.io/integrations/creating-nodes/
-- 💬 Community forum: https://community.n8n.io/
-- 🎯 Creator portal: https://creators.n8n.io/nodes
+## Supported AI Assistants
+
+[![Cursor](https://img.shields.io/badge/Cursor-00D9FF?style=flat-square&logo=cursor&logoColor=white)](#cursor)
+[![Windsurf](https://img.shields.io/badge/Windsurf-3B82F6?style=flat-square)](#windsurf)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-9333EA?style=flat-square&logo=anthropic&logoColor=white)](#claude-code)
+[![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-181717?style=flat-square&logo=github&logoColor=white)](#github-copilot)
+[![Cline](https://img.shields.io/badge/Cline-FF6B6B?style=flat-square)](#cline)
+[![Roo-Cline](https://img.shields.io/badge/Roo--Cline-F97316?style=flat-square)](#roo-cline)
+[![Continue.dev](https://img.shields.io/badge/Continue.dev-0EA5E9?style=flat-square)](#continuedev)
+[![Aider](https://img.shields.io/badge/Aider-2563EB?style=flat-square)](#aider)
+[![Zed](https://img.shields.io/badge/Zed-084CCF?style=flat-square&logo=zed&logoColor=white)](#zed)
+[![JetBrains AI](https://img.shields.io/badge/JetBrains%20AI-000000?style=flat-square&logo=jetbrains&logoColor=white)](#jetbrains-ai)
+[![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-4285F4?style=flat-square&logo=google&logoColor=white)](#gemini-cli)
+
+---
+
+## Quick Start
+
+### 1. Clone & Install
+
+```bash
+git clone https://github.com/your-username/n8n-nodes-starter.git
+cd n8n-nodes-starter
+npm install
+```
+
+### 2. Choose Your AI Tool
+
+Pick **one** AI assistant and remove the configuration files for all others to avoid conflicts:
+
+| I use... | Run this to clean up |
+|----------|---------------------|
+| **Cursor** | `rm -rf CLAUDE.md .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini .windsurf` |
+| **Windsurf** | `rm -rf CLAUDE.md .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini .cursor` |
+| **Claude Code** | `rm -rf .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini` |
+| **GitHub Copilot** | `rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .aiassistant .gemini` |
+| **Cline** | `rm -rf CLAUDE.md .cursor .windsurf .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini` |
+| **Roo-Cline** | `rm -rf CLAUDE.md .cursor .windsurf .clinerules .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini` |
+| **Continue.dev** | `rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .github/copilot-instructions.md .aiassistant .gemini` |
+| **Aider** | `rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .continue .github/copilot-instructions.md .aiassistant .gemini` |
+| **Zed** | `rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini` |
+| **JetBrains AI** | `rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .gemini` |
+| **Gemini CLI** | `rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant` |
+
+> **Note**: Keep `AGENTS.md` — it's the single source of truth referenced by multiple tools.
+
+### 3. Start Development
+
+```bash
+npm run dev  # Opens n8n at http://localhost:5678
+```
+
+### 4. Ask Your AI
+
+> "Create a new n8n node for the Stripe API with API key authentication and CRUD operations for customers"
+
+---
+
+## Tool Configuration Reference
+
+Each AI assistant requires a specific configuration format. Here's why we created each file and how it's customized for n8n node development.
+
+---
+
+### Cursor
+
+[![Cursor](https://img.shields.io/badge/Cursor-00D9FF?style=for-the-badge&logo=cursor&logoColor=white)](https://cursor.com)
+
+**Config Files:**
+```
+.cursor/rules/
+├── n8n-node-development.mdc   # Main rules (344 lines)
+├── credentials.mdc            # Credential-specific rules
+└── documentation.mdc          # Doc navigation helper
+```
+
+**Why these files:** Cursor uses MDC format (Markdown + YAML frontmatter) with glob patterns to auto-attach rules when editing specific file types. We created three focused rule files that activate based on what you're editing — node files, credentials, or documentation.
+
+**Customizations:**
+- `globs: ["nodes/**/*.ts", "credentials/**/*.ts"]` — Auto-applies to n8n source files
+- `alwaysApply: false` — Only loads when relevant files are open
+- Excludes `node_modules/**` and `dist/**`
+
+**If using Cursor, remove others:**
+```bash
+rm -rf CLAUDE.md .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini .windsurf
+```
+
+---
+
+### Windsurf
+
+[![Windsurf](https://img.shields.io/badge/Windsurf-3B82F6?style=for-the-badge)](https://codeium.com/windsurf)
+
+**Config Files:**
+```
+.windsurf/rules/
+└── n8n-boilerplate.md         # Main rules (379 lines)
+```
+
+**Why this file:** Windsurf uses YAML frontmatter with `trigger: always_on` to keep rules active across all files. We created a comprehensive step-by-step workflow guide that walks through the entire node development process from API research to publishing.
+
+**Customizations:**
+- `trigger: always_on` — Rules always visible in Cascade
+- Decision tree for architecture selection
+- 8-step workflow from research to registration
+
+**If using Windsurf, remove others:**
+```bash
+rm -rf CLAUDE.md .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini .cursor
+```
+
+---
+
+### Claude Code
+
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-9333EA?style=for-the-badge&logo=anthropic&logoColor=white)](https://claude.ai/code)
+
+**Config Files:**
+```
+CLAUDE.md                      # Project rules (165 lines)
+AGENTS.md                      # Detailed reference (445 lines)
+```
+
+**Why these files:** Claude Code reads `CLAUDE.md` from the project root as its primary instruction file. It's designed for natural language context with code examples. We also include `AGENTS.md` as a comprehensive reference that Claude can access via file reading.
+
+**Customizations:**
+- Key commands section for quick reference
+- Decision tree in prose format
+- Pattern examples with inline comments
+- References to all 31 documentation files
+
+**If using Claude Code, remove others:**
+```bash
+rm -rf .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini
+```
+
+---
+
+### GitHub Copilot
+
+[![GitHub Copilot](https://img.shields.io/badge/GitHub%20Copilot-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/features/copilot)
+
+**Config Files:**
+```
+.github/
+└── copilot-instructions.md    # Repository instructions (227 lines)
+```
+
+**Why this file:** GitHub Copilot reads `.github/copilot-instructions.md` for repository-level context. This file provides the AI with project-specific patterns that apply to all Copilot suggestions within the repo.
+
+**Customizations:**
+- Technology stack table
+- ASCII decision tree for quick parsing
+- Routing types reference table
+- Complete 31-file documentation index
+
+**If using GitHub Copilot, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .aiassistant .gemini
+```
+
+---
+
+### Cline
+
+[![Cline](https://img.shields.io/badge/Cline-FF6B6B?style=for-the-badge)](https://github.com/cline/cline)
+
+**Config Files:**
+```
+.clinerules                    # Project rules (126 lines)
+```
+
+**Why this file:** Cline (VS Code extension) reads `.clinerules` for project-specific instructions. It's a simple markdown format focused on concise rules that Cline applies during autonomous coding sessions.
+
+**Customizations:**
+- Architecture decision matrix
+- File structure with annotations
+- SDK execution pattern template
+- Common mistakes as bullet points
+
+**If using Cline, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini
+```
+
+---
+
+### Roo-Cline
+
+[![Roo-Cline](https://img.shields.io/badge/Roo--Cline-F97316?style=for-the-badge)](https://github.com/RooVetGit/Roo-Cline)
+
+**Config Files:**
+```
+.roomodes                      # Custom modes (264 lines, YAML)
+```
+
+**Why this file:** Roo-Cline supports custom "modes" that define different AI personas with specific file access permissions. We created three specialized modes for different development tasks.
+
+**Customizations:**
+- **n8n-node-developer** — Full access to nodes/ and credentials/
+- **n8n-credential-developer** — Focused on credentials/ only
+- **n8n-docs-navigator** — Read-only mode for documentation help
+- `fileRegex` patterns restrict edits to relevant files
+
+**If using Roo-Cline, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .clinerules .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini
+```
+
+---
+
+### Continue.dev
+
+[![Continue.dev](https://img.shields.io/badge/Continue.dev-0EA5E9?style=for-the-badge)](https://continue.dev)
+
+**Config Files:**
+```
+.continue/rules/
+└── n8n-rules.md               # Project rules (144 lines)
+```
+
+**Why this file:** Continue.dev uses a `rules/` directory for project-specific markdown instructions. It supports `@file` references to include other files in context.
+
+**Customizations:**
+- Uses `@nodes/GithubIssues/` syntax for file references
+- Table-based common mistakes guide
+- Integration with Continue's context system
+
+**If using Continue.dev, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .github/copilot-instructions.md .aiassistant .gemini
+```
+
+---
+
+### Aider
+
+[![Aider](https://img.shields.io/badge/Aider-2563EB?style=for-the-badge)](https://aider.chat)
+
+**Config Files:**
+```
+.aider.conf.yml                # Aider configuration (33 lines)
+AGENTS.md                      # Read by Aider automatically
+```
+
+**Why these files:** Aider uses `.aider.conf.yml` for project configuration and automatically reads files listed in the `read:` section. We configured it to load the main rules and key documentation files.
+
+**Customizations:**
+- `read:` section loads AGENTS.md and key docs
+- `lint-cmd: npm run lint` — Auto-lint after changes
+- `auto-lint: true` — Automatically run linter
+- `watch-files:` monitors node and credential files
+
+**If using Aider, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .continue .github/copilot-instructions.md .aiassistant .gemini
+```
+
+---
+
+### Zed
+
+[![Zed](https://img.shields.io/badge/Zed-084CCF?style=for-the-badge&logo=zed&logoColor=white)](https://zed.dev)
+
+**Config Files:**
+```
+.rules                         # Zed rules (58 lines)
+```
+
+**Why this file:** Zed reads `.rules` from the project root for AI assistant context. It's a compact markdown format designed for quick parsing.
+
+**Customizations:**
+- Ultra-compact format (58 lines)
+- Essential commands and patterns only
+- Reference file paths for deeper context
+
+**If using Zed, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant .gemini
+```
+
+---
+
+### JetBrains AI
+
+[![JetBrains AI](https://img.shields.io/badge/JetBrains%20AI-000000?style=for-the-badge&logo=jetbrains&logoColor=white)](https://www.jetbrains.com/ai/)
+
+**Config Files:**
+```
+.aiassistant/rules/
+└── n8n-rules.md               # AI Assistant rules (151 lines)
+```
+
+**Why this file:** JetBrains AI Assistant reads from `.aiassistant/rules/` directory for project-specific instructions in IntelliJ, WebStorm, and other JetBrains IDEs.
+
+**Customizations:**
+- Table-formatted technology stack
+- Decision tree with clear branching
+- Complete pattern examples
+- IDE-friendly markdown structure
+
+**If using JetBrains AI, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .gemini
+```
+
+---
+
+### Gemini CLI
+
+[![Gemini CLI](https://img.shields.io/badge/Gemini%20CLI-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+
+**Config Files:**
+```
+.gemini/
+└── settings.json              # Gemini configuration (JSON)
+```
+
+**Why this file:** Gemini CLI uses JSON configuration for project context. We define key references and code style preferences that Gemini uses when generating code.
+
+**Customizations:**
+- `projectContext` with description and rules reference
+- `codeStyle` preferences for TypeScript strict mode
+- `keyReferences` pointing to example files
+
+**If using Gemini CLI, remove others:**
+```bash
+rm -rf CLAUDE.md .cursor .windsurf .clinerules .roomodes .rules .aider.conf.yml .continue .github/copilot-instructions.md .aiassistant
+```
+
+---
+
+## Project Structure
+
+```
+├── .cursor/rules/              # Cursor (MDC format, glob patterns)
+│   ├── n8n-node-development.mdc
+│   ├── credentials.mdc
+│   └── documentation.mdc
+├── .windsurf/rules/            # Windsurf (always_on trigger)
+│   └── n8n-boilerplate.md
+├── .continue/rules/            # Continue.dev (@ file refs)
+│   └── n8n-rules.md
+├── .github/                    # GitHub Copilot
+│   └── copilot-instructions.md
+├── .aiassistant/rules/         # JetBrains AI
+│   └── n8n-rules.md
+├── .gemini/                    # Gemini CLI
+│   └── settings.json
+├── AGENTS.md                   # Single source of truth
+├── CLAUDE.md                   # Claude Code
+├── .clinerules                 # Cline
+├── .roomodes                   # Roo-Cline (3 modes)
+├── .rules                      # Zed
+├── .aider.conf.yml             # Aider
+├── credentials/                # Auth implementations
+│   ├── GithubIssuesApi.credentials.ts
+│   └── GithubIssuesOAuth2Api.credentials.ts
+├── nodes/                      # Node implementations
+│   ├── Example/                # Programmatic pattern
+│   └── GithubIssues/           # Declarative pattern
+│       ├── resources/          # Per-resource operations
+│       ├── listSearch/         # Dynamic dropdowns
+│       └── shared/             # Reusable utilities
+└── docs/                       # 31 documentation files
+```
+
+---
+
+## Documentation (31 Files)
+
+All AI configurations reference these documentation files:
+
+| # | File | Purpose |
+|---|------|---------|
+| 00 | `documentation-index.md` | Master index |
+| 01 | `project-structure-overview.md` | Repository layout |
+| 02 | `package-json-configuration.md` | npm setup |
+| 03 | `typescript-configuration.md` | tsconfig.json |
+| 04 | `node-anatomy-and-architecture.md` | Node structure |
+| 05 | `declarative-vs-programmatic-nodes.md` | Architecture choice |
+| 06 | `node-properties-reference.md` | Property types |
+| 07 | `credentials-system-overview.md` | Auth overview |
+| 08 | `api-key-credentials.md` | API key auth |
+| 09 | `oauth2-credentials.md` | OAuth2 auth |
+| 10 | `creating-your-first-node.md` | Tutorial |
+| 11 | `resources-and-operations.md` | Multi-resource |
+| 12 | `declarative-routing.md` | routing.send |
+| 13 | `custom-execute-methods.md` | execute() |
+| 14 | `list-search-methods.md` | Dropdowns |
+| 15 | `resource-locators.md` | Multi-mode inputs |
+| 16 | `pagination-handling.md` | Pagination |
+| 17 | `error-handling-patterns.md` | Errors |
+| 18 | `helper-functions-and-utilities.md` | Utilities |
+| 19 | `external-sdk-integration.md` | SDK patterns |
+| 20 | `icons-and-branding.md` | SVG icons |
+| 21 | `node-json-metadata.md` | node.json |
+| 22 | `development-workflow.md` | Dev workflow |
+| 23 | `testing-strategies.md` | Testing |
+| 24 | `linting-and-code-quality.md` | ESLint |
+| 25 | `preparing-for-publication.md` | Pre-publish |
+| 26 | `publishing-to-npm.md` | npm publish |
+| 27 | `n8n-cloud-verification.md` | Cloud verification |
+| 28 | `complete-code-examples.md` | Examples |
+| 29 | `common-patterns-and-recipes.md` | Recipes |
+| 30 | `troubleshooting-guide.md` | Troubleshooting |
+
+---
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `npm install` | Install dependencies |
+| `npm run dev` | Start n8n with hot reload |
+| `npm run build` | Compile TypeScript |
+| `npm run lint` | Check code quality |
+| `npm run lint:fix` | Auto-fix lint issues |
+| `npm run release` | Create new release |
+
+---
+
+## License
+
+MIT License — see [LICENSE.md](LICENSE.md)
+
+---
+
+## Resources
+
+- [n8n Creating Nodes](https://docs.n8n.io/integrations/creating-nodes/)
+- [n8n Community Forum](https://community.n8n.io/)
+- [n8n Creator Portal](https://creators.n8n.io/nodes)
+
