@@ -4,23 +4,28 @@
  * FAIL-SAFE: If any processing fails, sends as plain text (API handles it)
  */
 
-export interface BlockStructure {
+export interface TextBlockStructure {
 	type: 'text';
 	markdown: string;
 	// Valid textStyle values per API: card, page, h1, h2, h3, h4, caption, body
-	// Note: 'code' is NOT a valid textStyle - API auto-detects code blocks from ``` syntax
-	textStyle?: 'body' | 'card' | 'page' | 'h1' | 'h2' | 'h3' | 'h4' | 'caption';
+	textStyle: 'body' | 'card' | 'page' | 'h1' | 'h2' | 'h3' | 'h4' | 'caption';
 	listStyle?: 'none' | 'bullet' | 'numbered' | 'todo' | 'toggle';
 }
 
+export interface CodeBlockStructure {
+	type: 'code';
+	rawCode: string;
+	language?: string;
+}
+
+export type BlockStructure = TextBlockStructure | CodeBlockStructure;
+
 export interface BlockBuilderOptions {
-	maxBlockSize: number;
 	preserveHeaders: boolean;
 	splitOnParagraphs: boolean;
 }
 
 const DEFAULT_OPTIONS: BlockBuilderOptions = {
-	maxBlockSize: 5000,
 	preserveHeaders: true,
 	splitOnParagraphs: true,
 };
@@ -29,14 +34,33 @@ const DEFAULT_OPTIONS: BlockBuilderOptions = {
  * Create a text block with explicit 'body' textStyle
  * API REQUIRES textStyle - cannot be omitted!
  */
-function createBodyTextBlock(markdown: string): BlockStructure {
+function createBodyTextBlock(markdown: string): TextBlockStructure {
 	return { type: 'text', markdown: markdown.trim(), textStyle: 'body' };
+}
+
+/**
+ * Create a code block with rawCode property
+ * Extracts language hint from opening ``` if present
+ */
+function createCodeBlock(codeContent: string): CodeBlockStructure {
+	// Extract content between ``` markers
+	const match = codeContent.match(/^```(\w*)\n?([\s\S]*?)\n?```$/);
+	if (match) {
+		return {
+			type: 'code',
+			rawCode: match[2].trim(),
+			...(match[1] ? { language: match[1] } : {}),
+		};
+	}
+	// Fallback: remove ``` markers manually
+	const cleaned = codeContent.replace(/^```\w*\n?/, '').replace(/\n?```$/, '');
+	return { type: 'code', rawCode: cleaned.trim() };
 }
 
 /**
  * Detect text style from markdown content (only for headers)
  */
-function detectTextStyle(line: string): BlockStructure['textStyle'] | undefined {
+function detectTextStyle(line: string): TextBlockStructure['textStyle'] | undefined {
 	if (line.startsWith('# ')) return 'h1';
 	if (line.startsWith('## ')) return 'h2';
 	if (line.startsWith('### ')) return 'h3';
@@ -131,9 +155,9 @@ export function buildBlocksFromMarkdown(
 
 		for (const segment of segments) {
 			try {
-				// Code blocks: send with textStyle: 'body', API auto-detects code from ``` syntax
+				// Code blocks: send as type: 'code' with rawCode property
 				if (segment.type === 'code') {
-					blocks.push(createBodyTextBlock(segment.content));
+					blocks.push(createCodeBlock(segment.content));
 					continue;
 				}
 

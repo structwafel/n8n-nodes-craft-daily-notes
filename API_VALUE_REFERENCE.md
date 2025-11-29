@@ -110,6 +110,41 @@
 
 ---
 
+## Block Insert Content Modes
+
+### Content-Type Header Negotiation
+**Source:** API docs - POST /blocks endpoint
+
+The API supports two content-type approaches for inserting blocks:
+
+| Mode | Content-Type | Body Format | Position Location |
+|------|--------------|-------------|-------------------|
+| **Raw Markdown (API Native)** | `text/markdown` | Raw markdown string | Query param: `?position={"position":"end","date":"today"}` |
+| **Structured JSON** | `application/json` | `{"blocks":[...],"position":{...}}` | Request body |
+
+**Raw Markdown Example:**
+```http
+POST /blocks?position={"position":"end","date":"today"}
+Content-Type: text/markdown
+
+## Meeting Notes
+
+- Discussed Q1 goals
+- Action items assigned
+```
+
+**Structured JSON Example:**
+```json
+{
+  "blocks": [{"type":"text","markdown":"## Meeting Notes\n\n- Discussed Q1 goals"}],
+  "position": {"position":"end","date":"today"}
+}
+```
+
+**Recommendation:** Use Raw Markdown (API Native) mode for simple content insertion. It's simpler and lets the API handle markdown parsing. Use Structured JSON when you need to set additional block properties (colors, styles, taskInfo).
+
+---
+
 ## Position Object
 
 ### position

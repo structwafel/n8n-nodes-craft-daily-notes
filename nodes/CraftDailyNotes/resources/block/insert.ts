@@ -13,37 +13,10 @@ import type {
 import { buildBlocksFromMarkdown, parseBlockArray } from '../../shared/blockBuilder';
 
 /**
- * PreSend hook for block insert operation
- * Transforms markdown content or JSON blocks into the API request body
+ * Build position object from node parameters
  */
-export async function blockInsertPreSend(
-	this: IExecuteSingleFunctions,
-	requestOptions: IHttpRequestOptions,
-): Promise<IHttpRequestOptions> {
-	const contentMode = this.getNodeParameter('contentMode') as string;
-
-	let blocks: IDataObject[];
-
-	if (contentMode === 'markdown') {
-		// Smart block building from markdown
-		const markdownContent = this.getNodeParameter('markdownContent') as string;
-		const processingOptions = this.getNodeParameter('blockProcessingOptions', {}) as IDataObject;
-
-		const builtBlocks = buildBlocksFromMarkdown(markdownContent, {
-			maxBlockSize: (processingOptions.maxBlockSize as number) || 5000,
-			preserveHeaders: processingOptions.preserveHeaders !== false,
-			splitOnParagraphs: processingOptions.splitOnParagraphs !== false,
-		});
-
-		blocks = builtBlocks as unknown as IDataObject[];
-	} else {
-		// Parse JSON block array
-		const blocksJson = this.getNodeParameter('blocksJson') as string;
-		blocks = parseBlockArray(blocksJson) as unknown as IDataObject[];
-	}
-
-	// Build position object
-	const positionParam = this.getNodeParameter('position', {}) as IDataObject;
+function buildPositionObject(context: IExecuteSingleFunctions): IDataObject {
+	const positionParam = context.getNodeParameter('position', {}) as IDataObject;
 	const positionValues = (positionParam.positionValues as IDataObject) || {};
 
 	const position: IDataObject = {
@@ -59,7 +32,71 @@ export async function blockInsertPreSend(
 		position.referenceBlockId = positionValues.referenceBlockId;
 	}
 
-	// Set the request body
+	return position;
+}
+
+/**
+ * PreSend hook for block insert operation
+ * Transforms markdown content or JSON blocks into the API request body
+ * Supports three modes:
+ * - rawMarkdown: Uses native API text/markdown content-type (simplest)
+ * - markdown: Client-side block building with smart splitting
+ * - blocks: Pre-structured JSON block array
+ */
+export async function blockInsertPreSend(
+	this: IExecuteSingleFunctions,
+	requestOptions: IHttpRequestOptions,
+): Promise<IHttpRequestOptions> {
+	const contentMode = this.getNodeParameter('contentMode') as string;
+
+	// Build position object (used by all modes)
+	const position = buildPositionObject(this);
+
+	// RAW MARKDOWN MODE: Use API's native text/markdown content-type
+	// This is the simplest approach - API handles markdown parsing directly
+	if (contentMode === 'rawMarkdown') {
+		const markdownContent = this.getNodeParameter('rawMarkdownContent') as string;
+
+		// Set Content-Type to text/markdown
+		requestOptions.headers = {
+			...requestOptions.headers,
+			'Content-Type': 'text/markdown',
+		};
+
+		// Position goes as query parameter for text/markdown mode
+		requestOptions.qs = {
+			...requestOptions.qs,
+			position: JSON.stringify(position),
+		};
+
+		// Raw markdown content as body
+		requestOptions.body = markdownContent;
+
+		return requestOptions;
+	}
+
+	// SMART MARKDOWN MODE: Client-side block building with smart splitting
+	if (contentMode === 'markdown') {
+		const markdownContent = this.getNodeParameter('markdownContent') as string;
+		const processingOptions = this.getNodeParameter('blockProcessingOptions', {}) as IDataObject;
+
+		const builtBlocks = buildBlocksFromMarkdown(markdownContent, {
+			preserveHeaders: processingOptions.preserveHeaders !== false,
+			splitOnParagraphs: processingOptions.splitOnParagraphs !== false,
+		});
+
+		requestOptions.body = {
+			blocks: builtBlocks as unknown as IDataObject[],
+			position,
+		};
+
+		return requestOptions;
+	}
+
+	// BLOCKS MODE: Pre-structured JSON block array
+	const blocksJson = this.getNodeParameter('blocksJson') as string;
+	const blocks = parseBlockArray(blocksJson) as unknown as IDataObject[];
+
 	requestOptions.body = {
 		blocks,
 		position,
@@ -78,9 +115,14 @@ export const blockInsertDescription: INodeProperties[] = [
 		type: 'options',
 		options: [
 			{
-				name: 'Markdown Text',
+				name: 'Raw Markdown (API Native)',
+				value: 'rawMarkdown',
+				description: 'Send markdown directly to API - simplest option, API handles parsing',
+			},
+			{
+				name: 'Smart Markdown (Block Split)',
 				value: 'markdown',
-				description: 'Paste any length content - automatically split into optimal blocks',
+				description: 'Client-side splitting into optimal blocks with header detection',
 			},
 			{
 				name: 'Block Array (Advanced)',
@@ -88,12 +130,32 @@ export const blockInsertDescription: INodeProperties[] = [
 				description: 'Provide pre-structured block array in JSON format',
 			},
 		],
-		default: 'markdown',
+		default: 'rawMarkdown',
 		displayOptions: { show: showOnlyForBlockInsert },
 		description: 'How to provide the content to insert',
 	},
 
-	// Markdown Content (shown when contentMode = markdown)
+	// Raw Markdown Content (shown when contentMode = rawMarkdown)
+	{
+		displayName: 'Markdown Content',
+		name: 'rawMarkdownContent',
+		type: 'string',
+		typeOptions: {
+			rows: 10,
+		},
+		default: '',
+		placeholder: '## Meeting Notes\n\n- Discussed Q1 goals\n- Action items assigned\n- Follow up next week',
+		description:
+			'Raw markdown content sent directly to the API using text/markdown content-type. The API handles parsing.',
+		displayOptions: {
+			show: {
+				...showOnlyForBlockInsert,
+				contentMode: ['rawMarkdown'],
+			},
+		},
+	},
+
+	// Smart Markdown Content (shown when contentMode = markdown)
 	{
 		displayName: 'Markdown Content',
 		name: 'markdownContent',
@@ -127,17 +189,6 @@ export const blockInsertDescription: INodeProperties[] = [
 			},
 		},
 		options: [
-			{
-				displayName: 'Max Block Size',
-				name: 'maxBlockSize',
-				type: 'number',
-				typeOptions: {
-					minValue: 1000,
-					maxValue: 10000,
-				},
-				default: 5000,
-				description: 'Maximum character count per block before splitting',
-			},
 			{
 				displayName: 'Preserve Headers',
 				name: 'preserveHeaders',

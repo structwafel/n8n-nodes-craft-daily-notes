@@ -71,7 +71,7 @@ export const taskAddDescription: INodeProperties[] = [
 						name: 'markdown',
 						type: 'string',
 						default: '',
-							required:	true,
+						required: true,
 						placeholder: 'Buy groceries',
 						description: 'The task content in markdown format',
 					},

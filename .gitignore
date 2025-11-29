@@ -29,6 +29,8 @@ CLAUDE.md
 # Development template files (not needed in published package)
 README_TEMPLATE.md
 craft-api-docs.md
+API_VALUE_REFERENCE.md
+text-test.md
 docs/
 
 # Logs

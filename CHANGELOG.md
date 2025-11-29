@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.12] - 2025-11-29
+
+### Added
+
+- **Raw Markdown (API Native)** content mode for block insert
+  - Sends markdown directly to API using `Content-Type: text/markdown`
+  - Position passed as query parameter - simplest approach, API handles parsing
+  - Now the default content mode for easier usage
+
+### Fixed
+
+- **Critical**: Code blocks now sent as `type: "code"` with `rawCode` property
+  - Previous: sent as `type: "text"` with markdown containing ``` syntax
+  - API requires proper code block structure with `rawCode` field
+  - Language hints (e.g., \`\`\`javascript) are extracted and sent as `language` property
+
+### Changed
+
+- Renamed content modes for clarity:
+  - "Raw Markdown (API Native)" - new default, simplest option
+  - "Smart Markdown (Block Split)" - client-side processing with header detection
+  - "Block Array (Advanced)" - for full control over block properties
+
+### Removed
+
+- Removed unused `maxBlockSize` option from block processing (was defined but never implemented)
+
 ## [1.0.11] - 2025-11-29
 
 ### Fixed
