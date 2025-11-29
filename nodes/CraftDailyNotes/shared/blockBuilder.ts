@@ -32,7 +32,9 @@ function detectTextStyle(line: string): BlockStructure['textStyle'] {
 	if (line.startsWith('# ')) return 'h1';
 	if (line.startsWith('## ')) return 'h2';
 	if (line.startsWith('### ')) return 'h3';
-	if (line.startsWith('#### ') || line.startsWith('##### ') || line.startsWith('###### ')) return 'h3';
+	// h4 is the deepest heading level supported by the API
+	// Map ####, #####, ###### all to h4
+	if (line.startsWith('#### ') || line.startsWith('##### ') || line.startsWith('###### ')) return 'h4';
 	// Note: Code blocks (```) are auto-detected by API from markdown syntax
 	// Valid textStyle values: card, page, h1, h2, h3, h4, caption, body
 	return 'body';

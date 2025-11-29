@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.6] - 2025-11-29
+
+### Fixed
+
+- **Block Update**: Fixed textStyle options to match valid API values
+  - Removed invalid: `code`, `subtitle`, `title`
+  - Added missing: `caption`, `card`, `h4`, `page`
+- **Heading Detection**: `####` markdown now correctly maps to `h4` (was incorrectly mapped to `h3`)
+
+### Added
+
+- `API_VALUE_REFERENCE.md` - Complete reference of valid API values to prevent future issues
+
 ## [1.0.5] - 2025-11-29
 
 ### Fixed

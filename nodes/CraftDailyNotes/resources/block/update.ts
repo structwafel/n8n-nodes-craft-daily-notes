@@ -46,17 +46,20 @@ export const blockUpdateDescription: INodeProperties[] = [
 						displayName: 'Text Style',
 						name: 'textStyle',
 						type: 'options',
+						// Valid API values: card, page, h1, h2, h3, h4, caption, body
+						// Note: 'code' is NOT a valid textStyle - API auto-detects from ``` syntax
 						options: [
 							{ name: 'Body', value: 'body' },
-							{ name: 'Code', value: 'code' },
+							{ name: 'Caption', value: 'caption' },
+							{ name: 'Card', value: 'card' },
 							{ name: 'Heading 1', value: 'h1' },
 							{ name: 'Heading 2', value: 'h2' },
 							{ name: 'Heading 3', value: 'h3' },
-							{ name: 'Subtitle', value: 'subtitle' },
-							{ name: 'Title', value: 'title' },
+							{ name: 'Heading 4', value: 'h4' },
+							{ name: 'Page', value: 'page' },
 						],
 						default: 'body',
-						description: 'The text style for the block (optional)',
+						description: 'The text style for the block (optional). Code blocks are auto-detected from ``` markdown syntax.',
 					},
 					{
 						displayName: 'List Style',
