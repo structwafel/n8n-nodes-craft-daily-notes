@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2025-11-29
+
+### Fixed
+
+- **Critical**: Credential test now uses `/tasks?scope=active` instead of `/blocks?date=today`
+- The previous test failed with 404 when no daily note exists for today's date, incorrectly reporting "Couldn't connect"
+- The new test endpoint always returns 200 OK even with empty results
+
 ## [1.0.3] - 2025-11-29
 
 ### Fixed

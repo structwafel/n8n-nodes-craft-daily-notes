@@ -30,13 +30,15 @@ export class CraftDailyNotesApi implements ICredentialType {
 	// No authenticate block needed - the API URL itself IS the authentication
 	// The URL contains the unique identifier that grants access
 
+	// Use /tasks endpoint for credential test - it always returns 200 even with empty results
+	// The /blocks endpoint returns 404 if no daily note exists for the date
 	test: ICredentialTestRequest = {
 		request: {
 			baseURL: '={{$credentials.apiUrl}}',
-			url: '/blocks',
+			url: '/tasks',
 			method: 'GET',
 			qs: {
-				date: 'today',
+				scope: 'active',
 			},
 		},
 	};
