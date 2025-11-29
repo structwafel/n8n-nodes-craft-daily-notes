@@ -47,7 +47,7 @@ export async function blockInsertPreSend(
 	this: IExecuteSingleFunctions,
 	requestOptions: IHttpRequestOptions,
 ): Promise<IHttpRequestOptions> {
-	const contentMode = this.getNodeParameter('contentMode') as string;
+	const contentMode = this.getNodeParameter('contentMode', 'rawMarkdown') as string;
 
 	// Build position object (used by all modes)
 	const position = buildPositionObject(this);
@@ -55,7 +55,7 @@ export async function blockInsertPreSend(
 	// RAW MARKDOWN MODE: Use API's native text/markdown content-type
 	// This is the simplest approach - API handles markdown parsing directly
 	if (contentMode === 'rawMarkdown') {
-		const markdownContent = this.getNodeParameter('rawMarkdownContent') as string;
+		const markdownContent = this.getNodeParameter('rawMarkdownContent', '') as string;
 
 		// Set Content-Type to text/markdown
 		requestOptions.headers = {
@@ -77,7 +77,7 @@ export async function blockInsertPreSend(
 
 	// SMART MARKDOWN MODE: Client-side block building with smart splitting
 	if (contentMode === 'markdown') {
-		const markdownContent = this.getNodeParameter('markdownContent') as string;
+		const markdownContent = this.getNodeParameter('markdownContent', '') as string;
 		const processingOptions = this.getNodeParameter('blockProcessingOptions', {}) as IDataObject;
 
 		const builtBlocks = buildBlocksFromMarkdown(markdownContent, {
@@ -140,6 +140,7 @@ export const blockInsertDescription: INodeProperties[] = [
 		displayName: 'Markdown Content',
 		name: 'rawMarkdownContent',
 		type: 'string',
+		required: true,
 		typeOptions: {
 			rows: 10,
 		},
@@ -160,6 +161,7 @@ export const blockInsertDescription: INodeProperties[] = [
 		displayName: 'Markdown Content',
 		name: 'markdownContent',
 		type: 'string',
+		required: true,
 		typeOptions: {
 			rows: 10,
 		},
@@ -227,7 +229,7 @@ export const blockInsertDescription: INodeProperties[] = [
 		displayName: 'Position',
 		name: 'position',
 		type: 'fixedCollection',
-		default: {},
+		default: { positionValues: { position: 'end', date: 'today' } },
 		placeholder: 'Add Position',
 		displayOptions: { show: showOnlyForBlockInsert },
 		options: [
