@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.10] - 2025-11-29
+
+### Added
+
+- **Fail-Safe Error Handling**: Block builder now never throws - always produces valid output
+  - If code block extraction fails → send whole content as plain text
+  - If paragraph splitting fails → send whole segment as plain text
+  - If any segment processing fails → send that segment as plain text
+  - Ultimate fallback: any error → send entire markdown as single plain text block
+  - Plain text blocks have no `textStyle` - API uses sensible defaults
+
+### Changed
+
+- `detectTextStyle()` now returns `undefined` for non-headers (let API decide)
+- Added `createPlainTextBlock()` helper for consistent fail-safe blocks
+
 ## [1.0.9] - 2025-11-29
 
 ### Fixed

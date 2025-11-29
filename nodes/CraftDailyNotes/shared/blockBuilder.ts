@@ -1,7 +1,7 @@
 /**
  * SMART BLOCK BUILDER
  * Converts markdown content into Craft API block structure
- * Handles code blocks, headers, and intelligent splitting
+ * FAIL-SAFE: If any processing fails, sends as plain text (API handles it)
  */
 
 export interface BlockStructure {
@@ -26,15 +26,22 @@ const DEFAULT_OPTIONS: BlockBuilderOptions = {
 };
 
 /**
- * Detect text style from markdown content
+ * FAIL-SAFE: Create a single plain text block (no textStyle = API uses defaults)
  */
-function detectTextStyle(line: string): BlockStructure['textStyle'] {
+function createPlainTextBlock(markdown: string): BlockStructure {
+	return { type: 'text', markdown: markdown.trim() };
+}
+
+/**
+ * Detect text style from markdown content (only for headers)
+ */
+function detectTextStyle(line: string): BlockStructure['textStyle'] | undefined {
 	if (line.startsWith('# ')) return 'h1';
 	if (line.startsWith('## ')) return 'h2';
 	if (line.startsWith('### ')) return 'h3';
-	// h4 is the deepest heading level supported by the API
 	if (line.startsWith('#### ') || line.startsWith('##### ') || line.startsWith('###### ')) return 'h4';
-	return 'body';
+	// Return undefined for non-headers - let API decide
+	return undefined;
 }
 
 /**
@@ -46,122 +53,135 @@ function isHeader(line: string): boolean {
 
 /**
  * Extract code blocks from markdown BEFORE paragraph splitting
- * Returns array of {type: 'code' | 'text', content: string}
+ * FAIL-SAFE: If regex fails, returns whole content as text
  */
 function extractCodeBlocks(markdown: string): Array<{ type: 'code' | 'text'; content: string }> {
-	const result: Array<{ type: 'code' | 'text'; content: string }> = [];
-	
-	// Match code blocks: ```language\n...content...\n```
-	// This regex captures complete code blocks including internal newlines
-	const codeBlockRegex = /```[\s\S]*?```/g;
-	
-	let lastIndex = 0;
-	let match;
-	
-	while ((match = codeBlockRegex.exec(markdown)) !== null) {
-		// Add text before this code block
-		if (match.index > lastIndex) {
-			const textBefore = markdown.slice(lastIndex, match.index);
-			if (textBefore.trim()) {
-				result.push({ type: 'text', content: textBefore });
+	try {
+		const result: Array<{ type: 'code' | 'text'; content: string }> = [];
+		
+		// Match code blocks: ```...``` (including internal newlines)
+		const codeBlockRegex = /```[\s\S]*?```/g;
+		
+		let lastIndex = 0;
+		let match;
+		
+		while ((match = codeBlockRegex.exec(markdown)) !== null) {
+			if (match.index > lastIndex) {
+				const textBefore = markdown.slice(lastIndex, match.index);
+				if (textBefore.trim()) {
+					result.push({ type: 'text', content: textBefore });
+				}
+			}
+			result.push({ type: 'code', content: match[0] });
+			lastIndex = match.index + match[0].length;
+		}
+		
+		if (lastIndex < markdown.length) {
+			const remaining = markdown.slice(lastIndex);
+			if (remaining.trim()) {
+				result.push({ type: 'text', content: remaining });
 			}
 		}
 		
-		// Add the code block as a single unit
-		result.push({ type: 'code', content: match[0] });
-		lastIndex = match.index + match[0].length;
-	}
-	
-	// Add remaining text after last code block
-	if (lastIndex < markdown.length) {
-		const remaining = markdown.slice(lastIndex);
-		if (remaining.trim()) {
-			result.push({ type: 'text', content: remaining });
+		// If no segments found, return whole thing as text
+		if (result.length === 0) {
+			return [{ type: 'text', content: markdown }];
 		}
+		
+		return result;
+	} catch {
+		// FAIL-SAFE: Return whole content as single text segment
+		return [{ type: 'text', content: markdown }];
 	}
-	
-	return result;
 }
 
 /**
  * Split text by paragraphs (double newlines)
+ * FAIL-SAFE: If split fails, returns whole text
  */
 function splitByParagraphs(text: string): string[] {
-	return text.split(/\n\n+/).filter((p) => p.trim());
+	try {
+		const parts = text.split(/\n\n+/).filter((p) => p.trim());
+		return parts.length > 0 ? parts : [text];
+	} catch {
+		return [text];
+	}
 }
 
 /**
  * Build blocks from markdown content
- * Main entry point for the block builder
+ * FAIL-SAFE: Any error = send whole content as plain text
  */
 export function buildBlocksFromMarkdown(
 	markdown: string,
 	options: Partial<BlockBuilderOptions> = {},
 ): BlockStructure[] {
-	const opts = { ...DEFAULT_OPTIONS, ...options };
-	const blocks: BlockStructure[] = [];
-
 	// Handle empty input
 	if (!markdown || !markdown.trim()) {
 		return [];
 	}
 
-	// STEP 1: Extract code blocks first (they should never be split)
-	const segments = extractCodeBlocks(markdown);
+	try {
+		const opts = { ...DEFAULT_OPTIONS, ...options };
+		const blocks: BlockStructure[] = [];
 
-	for (const segment of segments) {
-		// Code blocks: send as single block, NO textStyle (API auto-detects)
-		if (segment.type === 'code') {
-			blocks.push({
-				type: 'text',
-				markdown: segment.content.trim(),
-				// NO textStyle - API auto-detects code blocks from ``` syntax
-			});
-			continue;
-		}
+		// STEP 1: Extract code blocks first (preserved as single units)
+		const segments = extractCodeBlocks(markdown);
 
-		// STEP 2: Split text segments by paragraphs
-		const paragraphs = opts.splitOnParagraphs 
-			? splitByParagraphs(segment.content) 
-			: [segment.content];
+		for (const segment of segments) {
+			try {
+				// Code blocks: NO textStyle (API auto-detects from ``` syntax)
+				if (segment.type === 'code') {
+					blocks.push(createPlainTextBlock(segment.content));
+					continue;
+				}
 
-		for (const paragraph of paragraphs) {
-			const trimmed = paragraph.trim();
-			if (!trimmed) continue;
+				// STEP 2: Split text by paragraphs
+				const paragraphs = opts.splitOnParagraphs 
+					? splitByParagraphs(segment.content) 
+					: [segment.content];
 
-			// Headers: each gets its own block with textStyle
-			if (opts.preserveHeaders && isHeader(trimmed)) {
-				const lines = trimmed.split('\n');
-				for (const line of lines) {
-					const lineTrimmed = line.trim();
-					if (!lineTrimmed) continue;
-					
-					if (isHeader(lineTrimmed)) {
-						blocks.push({
-							type: 'text',
-							markdown: lineTrimmed,
-							textStyle: detectTextStyle(lineTrimmed),
-						});
+				for (const paragraph of paragraphs) {
+					const trimmed = paragraph.trim();
+					if (!trimmed) continue;
+
+					// Headers get textStyle, everything else is plain
+					if (opts.preserveHeaders && isHeader(trimmed)) {
+						const lines = trimmed.split('\n');
+						for (const line of lines) {
+							const lineTrimmed = line.trim();
+							if (!lineTrimmed) continue;
+							
+							const style = detectTextStyle(lineTrimmed);
+							if (style) {
+								blocks.push({ type: 'text', markdown: lineTrimmed, textStyle: style });
+							} else {
+								blocks.push(createPlainTextBlock(lineTrimmed));
+							}
+						}
 					} else {
-						// Non-header line after header - no textStyle needed
-						blocks.push({
-							type: 'text',
-							markdown: lineTrimmed,
-						});
+						// Plain text - no textStyle, API uses defaults
+						blocks.push(createPlainTextBlock(trimmed));
 					}
 				}
-				continue;
+			} catch {
+				// FAIL-SAFE: If segment processing fails, add as plain text
+				blocks.push(createPlainTextBlock(segment.content));
 			}
-
-			// Regular text: single block, no textStyle (API uses body by default)
-			blocks.push({
-				type: 'text',
-				markdown: trimmed,
-			});
 		}
-	}
 
-	return blocks;
+		// If we got blocks, return them
+		if (blocks.length > 0) {
+			return blocks;
+		}
+
+		// FAIL-SAFE: No blocks created? Send whole thing as one block
+		return [createPlainTextBlock(markdown)];
+
+	} catch {
+		// ULTIMATE FAIL-SAFE: Any error = send whole markdown as single plain text block
+		return [createPlainTextBlock(markdown)];
+	}
 }
 
 /**
