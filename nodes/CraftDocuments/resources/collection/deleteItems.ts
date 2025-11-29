@@ -1,6 +1,8 @@
 /**
  * COLLECTION DELETE ITEMS OPERATION
- * DELETE /collections/{collectionId}/items - Delete collection items
+ * DELETE /collections/{collectionId}/items - Delete items from a collection
+ * 
+ * Same as Daily Notes API - no differences
  */
 import type { INodeProperties } from 'n8n-workflow';
 
@@ -17,11 +19,10 @@ export const collectionDeleteItemsDescription: INodeProperties[] = [
 		},
 		default: '',
 		required: true,
-		description: 'Select a collection from your daily notes. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Select a collection from your documents. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: { show: showOnlyForCollectionDeleteItems },
 	},
-
-	// Item IDs to delete - parameter name matches API spec
+	// Item IDs to delete
 	{
 		displayName: 'Item IDs',
 		name: 'idsToDelete',
@@ -29,8 +30,7 @@ export const collectionDeleteItemsDescription: INodeProperties[] = [
 		default: '',
 		required: true,
 		placeholder: 'ID1, ID2, ID3 or ["ID1", "ID2"]',
-		description:
-			'Item IDs to delete. Provide as comma-separated values or JSON array. Non-existent IDs will be silently skipped.',
+		description: 'Item IDs to delete. Provide as comma-separated values or JSON array.',
 		displayOptions: { show: showOnlyForCollectionDeleteItems },
 		routing: {
 			send: {

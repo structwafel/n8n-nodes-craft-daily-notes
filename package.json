@@ -1,7 +1,7 @@
 {
 	"name": "n8n-nodes-craft-daily-notes",
 	"version": "1.0.24",
-	"description": "n8n community node for Craft Daily Notes API - manage blocks, tasks, collections and search",
+	"description": "n8n community nodes for Craft APIs - Daily Notes (blocks, tasks, collections, search) and Documents (multi-document management)",
 	"license": "MIT",
 	"homepage": "https://github.com/yigitkonur/n8n-nodes-craft-daily-notes",
 	"keywords": [
@@ -11,9 +11,12 @@
 		"automation",
 		"craft",
 		"daily-notes",
+		"documents",
+		"collections",
 		"tasks",
 		"productivity",
-		"notion"
+		"notion",
+		"knowledge-base"
 	],
 	"author": {
 		"name": "Yigit Konur",
@@ -27,7 +30,7 @@
 		"url": "https://github.com/yigitkonur/n8n-nodes-craft-daily-notes/issues"
 	},
 	"engines": {
-		"node": ">=18.0.0"
+		"node": ">=20.15.0"
 	},
 	"scripts": {
 		"build": "n8n-node build",
@@ -45,10 +48,12 @@
 		"n8nNodesApiVersion": 1,
 		"strict": true,
 		"credentials": [
-			"dist/credentials/CraftDailyNotesApi.credentials.js"
+			"dist/credentials/CraftDailyNotesApi.credentials.js",
+			"dist/credentials/CraftDocumentsApi.credentials.js"
 		],
 		"nodes": [
-			"dist/nodes/CraftDailyNotes/CraftDailyNotes.node.js"
+			"dist/nodes/CraftDailyNotes/CraftDailyNotes.node.js",
+			"dist/nodes/CraftDocuments/CraftDocuments.node.js"
 		]
 	},
 	"devDependencies": {

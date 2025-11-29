@@ -1,6 +1,8 @@
 /**
  * COLLECTION ADD ITEMS OPERATION
- * POST /collections/{collectionId}/items - Add items to collection
+ * POST /collections/{collectionId}/items - Add items to a collection
+ * 
+ * Same as Daily Notes API - no differences
  */
 import type { INodeProperties } from 'n8n-workflow';
 
@@ -17,11 +19,10 @@ export const collectionAddItemsDescription: INodeProperties[] = [
 		},
 		default: '',
 		required: true,
-		description: 'Select a collection from your daily notes. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Select a collection from your documents. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: { show: showOnlyForCollectionAddItems },
 	},
-
-	// Items to add - structured input (better UX than raw JSON)
+	// Items to add
 	{
 		displayName: 'Items',
 		name: 'items',
@@ -50,7 +51,7 @@ export const collectionAddItemsDescription: INodeProperties[] = [
 						name: 'properties',
 						type: 'json',
 						default: '{}',
-						description: 'Additional properties for the item as JSON object. Use "Get Schema" to see available fields.',
+						description: 'Additional properties for the item as JSON object. Schema depends on collection.',
 					},
 				],
 			},

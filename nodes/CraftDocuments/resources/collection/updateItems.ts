@@ -1,6 +1,8 @@
 /**
  * COLLECTION UPDATE ITEMS OPERATION
- * PUT /collections/{collectionId}/items - Update collection items
+ * PUT /collections/{collectionId}/items - Update items in a collection
+ * 
+ * Same as Daily Notes API - no differences
  */
 import type { INodeProperties } from 'n8n-workflow';
 
@@ -17,11 +19,10 @@ export const collectionUpdateItemsDescription: INodeProperties[] = [
 		},
 		default: '',
 		required: true,
-		description: 'Select a collection from your daily notes. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+		description: 'Select a collection from your documents. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 		displayOptions: { show: showOnlyForCollectionUpdateItems },
 	},
-
-	// Items to update - structured input (better UX than raw JSON)
+	// Items to update
 	{
 		displayName: 'Items to Update',
 		name: 'itemsToUpdate',
